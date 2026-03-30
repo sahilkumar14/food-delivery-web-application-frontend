@@ -3,8 +3,8 @@ import { Search } from "lucide-react";
 
 const Section01 = () => {
   return (
-    <div className="w-full min-h-screen bg-red-500">
-      <div className="bg-gradient-to-r from-orange-100 via-orange-200 to-white min-h-screen flex items-center">
+    <div className="w-full min-h-[130vh]">
+      <div className="bg-gradient-to-r from-orange-200 via-orange-100 to-white min-h-[130vh] flex items-center py-16">
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
 
@@ -61,8 +61,8 @@ const Section01 = () => {
 
             </div>
 
-            {/* RIGHT SIDE - FLOATING IMAGE CARD */}
-            <div className="flex justify-center md:justify-end">
+            {/* RIGHT SIDE - FLOATING IMAGE CARD (hidden on mobile) */}
+            <div className="hidden md:flex justify-center md:justify-end">
               <div className="relative w-[380px] h-[420px] group">
 
                 {/* LEFT BACK CARD */}
