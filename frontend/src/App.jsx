@@ -1,23 +1,40 @@
-import MainLayout from "./layout/MainLayout";
-import Button from "./components/Button";
+import React from 'react'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import LandingPage from './pages/landingPage'
+import Login from './pages/login'
+import Signup from './pages/signup'
+import UserProfile from './pages/userProfile'
+import OrderHistory from './pages/orderHistory'
+import OrdersList from './pages/ordersList'
+
+function NotFound() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-orange-50 text-gray-700">
+      <div className="text-center">
+        <h1 className="text-5xl font-bold">404</h1>
+        <p className="mt-2">Page not found.</p>
+        <a href="/" className="mt-4 inline-block px-4 py-2 bg-orange-500 text-white rounded-lg">Go Home</a>
+      </div>
+    </div>
+  )
+}
 
 function App() {
   return (
-    <MainLayout>
-      
-      {/* Page Content */}
-      <h1 className="text-2xl font-bold">Welcome to FoodieHub 🍔</h1>
-      
-      <p className="text-gray-600 mt-2">
-        Discover the best food near you.
-      </p>
-
-      <div className="mt-4">
-        <Button>Explore Now</Button>
-      </div>
-
-    </MainLayout>
-  );
+    <Router>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/profile" element={<UserProfile />} />
+        <Route path="/history" element={<OrderHistory />} />
+        <Route path="/orders" element={<OrdersList />} />
+        <Route path="/home" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Router>
+  )
 }
 
-export default App;
+export default App
+>>>>>>> dev
