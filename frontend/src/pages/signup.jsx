@@ -1,13 +1,19 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-const Signup = () => {
+const Signup = ({ onAuth }) => {
   const navigate = useNavigate()
   const [role, setRole] = useState('customer')
 
+  const handleSubmit = (event) => {
+    event.preventDefault()
+    onAuth && onAuth()
+    navigate('/profile')
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-100 via-orange-50 to-white flex items-center justify-center px-4 py-12" style={{ backgroundImage: 'radial-gradient(circle at 30% 25%, rgba(251, 146, 60, 0.15) 0, transparent 40%), radial-gradient(circle at 70% 65%, rgba(249, 115, 22, 0.16) 0, transparent 35%)' }}>
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-xl p-8 border border-orange-200 overflow-hidden relative">
+      <div className="w-full max-w-md bg-orange-50 rounded-4xl shadow-2xl p-8 border-2 border-orange-300 overflow-hidden relative">
         <div className="absolute -top-8 -left-8 w-28 h-28 rounded-full bg-orange-300/40 blur-2xl" />
         <div className="absolute bottom-[-22px] right-[-12px] w-20 h-20 rounded-full bg-orange-300/30 blur-2xl" />
         <h1 className="text-4xl font-extrabold text-orange-500 text-center">Join the Crew</h1>
@@ -30,7 +36,7 @@ const Signup = () => {
           ))}
         </div>
 
-        <form className="mt-8 space-y-5">
+        <form onSubmit={handleSubmit} className="mt-8 space-y-5">
           <label className="block">
             <span className="text-orange-600">Full Name</span>
             <input type="text" required className="mt-1 block w-full rounded-xl border border-orange-200 px-4 py-2 focus:border-orange-400 focus:ring-orange-400 outline-none" placeholder="Jane Doe" />
