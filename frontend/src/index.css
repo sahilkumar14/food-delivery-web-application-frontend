@@ -1,3 +1,4 @@
+@import "./theme.css";
 @import "tailwindcss";
 
 :root {
@@ -35,3 +36,4 @@ body {
   scrollbar-width: thin;
   scrollbar-color: #fb923c #ffedd5;
 }
+
