@@ -1,5 +1,5 @@
 import React from 'react'
-import Section01 from '../components/landingPageComponents/section01'
+import Section01 from '../components/landingPageComponents/Section01'
 import Section02 from '../components/landingPageComponents/Section02'
 import Section03 from '../components/landingPageComponents/Section03'
 

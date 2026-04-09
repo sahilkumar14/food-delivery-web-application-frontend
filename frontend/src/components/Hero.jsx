@@ -7,23 +7,23 @@ const Hero = ({ searchQuery, setSearchQuery, handleSearch }) => {
       {/* LEFT SIDE */}
       <div className="space-y-6">
 
-        <h1 className="text-5xl font-semibold leading-tight">
+        <h1 className="text-5xl font-semibold leading-tight text-gray-800">
           Delicious Food <br />
-          <span className="text-primary">Delivered Fast</span>
+          <span className="text-orange-600">Delivered Fast</span>
         </h1>
 
-        <p className="text-muted-foreground text-lg">
+        <p className="text-gray-600 text-lg">
           Order your favorite meals from the best restaurants in town.
           Fast delivery, fresh food, great prices.
         </p>
 
         {/* 🔍 Search Box */}
-        <div className="flex bg-card border border-border rounded-xl p-2 shadow-sm">
+        <div className="flex bg-white border border-orange-200 rounded-xl p-2 shadow-sm">
 
           <input
             type="text"
             placeholder="Search for food or restaurants..."
-            className="flex-1 bg-transparent outline-none px-3"
+            className="flex-1 bg-transparent outline-none px-3 text-gray-800 placeholder:text-gray-400"
             
             // ✅ CONNECTED TO STATE
             value={searchQuery}
@@ -32,7 +32,7 @@ const Hero = ({ searchQuery, setSearchQuery, handleSearch }) => {
 
           <button
             onClick={handleSearch} // ✅ BUTTON WORKS NOW
-            className="bg-primary text-primary-foreground px-6 py-2 rounded-lg"
+            className="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition"
           >
             Search
           </button>

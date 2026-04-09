@@ -3,8 +3,8 @@ import { Search } from "lucide-react";
 
 const Section01 = () => {
   return (
-    <div className="w-full min-h-[130vh]">
-      <div className="bg-gradient-to-r from-orange-200 via-orange-100 to-white min-h-[130vh] flex items-center py-16">
+    <div className="w-full min-h-[100vh]">
+      <div className="bg-gradient-to-b from-orange-50 to-white min-h-[100vh] flex items-center py-8">
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
 
@@ -14,7 +14,7 @@ const Section01 = () => {
             {/* LEFT SIDE */}
             <div className="max-w-xl">
 
-              <h2 className="text-5xl md:text-6xl font-extrabold text-gray-900 leading-tight">
+              <h2 className="text-5xl md:text-6xl font-extrabold text-gray-800 leading-tight">
                 Delicious Food
               </h2>
 
@@ -28,14 +28,14 @@ const Section01 = () => {
               </p>
 
               {/* SEARCH BAR */}
-              <div className="bg-white rounded-full shadow-lg p-2 w-full mt-8 flex items-center gap-2 hover:shadow-xl transition duration-300">
+              <div className="bg-white rounded-full shadow-lg p-2 w-full mt-8 flex items-center gap-2 hover:shadow-xl transition duration-300 border border-orange-200">
 
-                <Search className="w-5 h-5 text-gray-400 ml-4" />
+                <Search className="w-5 h-5 text-orange-500 ml-4" />
 
                 <input
                   type="text"
                   placeholder="Search for food or restaurants..."
-                  className="flex-1 px-2 py-3 outline-none bg-transparent text-gray-700 placeholder-gray-400"
+                  className="flex-1 px-2 py-3 outline-none bg-transparent text-gray-800 placeholder-gray-400"
                 />
 
                 <button className="bg-orange-500 text-white px-5 py-2 rounded-full mr-2 hover:bg-orange-600 transition">
@@ -46,16 +46,16 @@ const Section01 = () => {
               {/* STATS */}
               <div className="flex items-center gap-8 text-sm mt-6">
                 <div>
-                  <div className="text-2xl text-orange-500 font-bold">2000+</div>
-                  <div className="text-gray-500">Restaurants</div>
+                  <div className="text-2xl text-orange-600 font-bold">2000+</div>
+                  <div className="text-gray-600">Restaurants</div>
                 </div>
                 <div>
-                  <div className="text-2xl text-orange-500 font-bold">50K+</div>
-                  <div className="text-gray-500">Happy Customers</div>
+                  <div className="text-2xl text-orange-600 font-bold">50K+</div>
+                  <div className="text-gray-600">Happy Customers</div>
                 </div>
                 <div>
-                  <div className="text-2xl text-orange-500 font-bold">24/7</div>
-                  <div className="text-gray-500">Service</div>
+                  <div className="text-2xl text-orange-600 font-bold">24/7</div>
+                  <div className="text-gray-600">Service</div>
                 </div>
               </div>
 

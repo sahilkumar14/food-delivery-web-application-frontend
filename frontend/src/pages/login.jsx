@@ -1,14 +1,53 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { authService } from '../services/api'
 
 const Login = ({ onAuth }) => {
   const navigate = useNavigate()
   const [role, setRole] = useState('customer')
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  })
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  const handleSubmit = (event) => {
+  const handleChange = (event) => {
+    const { name, value } = event.target
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+    setError('')
+  }
+
+  const handleSubmit = async (event) => {
     event.preventDefault()
-    onAuth && onAuth()
-    navigate('/profile')
+    setLoading(true)
+    setError('')
+
+    // Validate inputs
+    if (!formData.email || !formData.password) {
+      setError('Email and password are required')
+      setLoading(false)
+      return
+    }
+
+    const result = await authService.login(
+      formData.email,
+      formData.password,
+      role
+    )
+
+    if (result.success) {
+      authService.saveUser(result.user)
+      onAuth && onAuth()
+      navigate('/home')
+    } else {
+      setError(result.error || 'Login failed. Please try again.')
+    }
+    
+    setLoading(false)
   }
 
   return (
@@ -38,18 +77,46 @@ const Login = ({ onAuth }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+          {error && (
+            <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
+
           <label className="block">
             <span className="text-orange-600">Email</span>
-            <input type="email" required className="mt-1 block w-full rounded-xl border border-orange-200 px-4 py-2 focus:border-orange-400 focus:ring-orange-400 outline-none" placeholder="you@example.com" />
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              disabled={loading}
+              className="mt-1 block w-full rounded-xl border border-orange-200 px-4 py-2 focus:border-orange-400 focus:ring-orange-400 outline-none disabled:bg-gray-200 placeholder:text-gray-400"
+              placeholder="you@example.com"
+            />
           </label>
 
           <label className="block">
             <span className="text-orange-600">Password</span>
-            <input type="password" required className="mt-1 block w-full rounded-xl border border-orange-200 px-4 py-2 focus:border-orange-400 focus:ring-orange-400 outline-none" placeholder="********" />
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              disabled={loading}
+              className="mt-1 block w-full rounded-xl border border-orange-200 px-4 py-2 focus:border-orange-400 focus:ring-orange-400 outline-none disabled:bg-gray-200 placeholder:text-gray-400"
+              placeholder="********"
+            />
           </label>
 
-          <button type="submit" className="w-full bg-orange-500 text-white py-3 rounded-xl font-semibold hover:bg-orange-600 transition">
-            Login as {role === 'agent' ? 'Delivery Agent' : role.charAt(0).toUpperCase() + role.slice(1)}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-orange-500 text-white py-3 rounded-xl font-semibold hover:bg-orange-600 transition disabled:bg-orange-300 disabled:cursor-not-allowed"
+          >
+            {loading ? 'Logging in...' : `Login as ${role === 'agent' ? 'Delivery Agent' : role.charAt(0).toUpperCase() + role.slice(1)}`}
           </button>
         </form>
 
