@@ -1,6 +1,6 @@
 const RestaurantCard = ({ restaurant }) => {
   return (
-    <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition">
+    <div className="bg-white border border-orange-100 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition hover:border-orange-500">
 
       <img
         src={restaurant.image}
@@ -9,15 +9,15 @@ const RestaurantCard = ({ restaurant }) => {
 
       <div className="p-4 space-y-2">
 
-        <h3 className="text-lg font-medium">
+        <h3 className="text-lg font-medium text-gray-800">
           {restaurant.name}
         </h3>
 
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-gray-600">
           {restaurant.cuisine}
         </p>
 
-        <div className="flex justify-between text-sm">
+        <div className="flex justify-between text-sm text-gray-600">
 
           <span>⭐ {restaurant.rating}</span>
 

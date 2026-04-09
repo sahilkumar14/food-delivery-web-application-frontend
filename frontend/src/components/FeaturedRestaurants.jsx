@@ -1,7 +1,7 @@
 import { useState } from "react";
 import RestaurantCard from "./RestaurantCard";
 
-const FeaturedRestaurants = ({ data }) => {
+const FeaturedRestaurants = ({ data = [] }) => {
 
   const [showAll, setShowAll] = useState(false);
 
@@ -13,14 +13,14 @@ const FeaturedRestaurants = ({ data }) => {
 
       <div className="flex justify-between items-center mb-6">
 
-        <h2 className="text-2xl font-medium">
+        <h2 className="text-2xl font-medium text-gray-800">
           Featured Restaurants
         </h2>
 
         {/* ✅ BUTTON */}
         <button
           onClick={() => setShowAll(!showAll)}
-          className="text-primary font-medium"
+          className="text-orange-600 hover:text-orange-500 font-medium transition"
         >
           {showAll ? "Show Less" : "View All"}
         </button>
@@ -41,7 +41,7 @@ const FeaturedRestaurants = ({ data }) => {
 
         ) : (
 
-          <p className="col-span-4 text-center text-gray-500 text-lg">
+          <p className="col-span-4 text-center text-gray-600 text-lg">
             No food found 😢
           </p>
 

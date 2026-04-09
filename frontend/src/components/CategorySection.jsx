@@ -11,7 +11,7 @@ const CategorySection = ({ setSelectedCategory }) => {
   return (
     <section className="max-w-7xl mx-auto px-6 py-10">
 
-      <h2 className="text-2xl mb-6">Browse by Category</h2>
+      <h2 className="text-2xl mb-6 text-gray-800">Browse by Category</h2>
 
       <div className="flex gap-10">
 

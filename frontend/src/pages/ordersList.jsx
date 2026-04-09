@@ -8,9 +8,9 @@ const activeOrders = [
 
 const OrdersList = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white p-4 md:p-10">
-      <div className="max-w-5xl mx-auto bg-white border border-orange-200 rounded-3xl shadow-lg p-8">
-        <h1 className="text-3xl font-extrabold text-orange-500 mb-4">Active Orders</h1>
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-gray-100 p-4 md:p-10">
+      <div className="max-w-5xl mx-auto bg-white border border-orange-100 rounded-3xl shadow-lg p-8">
+        <h1 className="text-3xl font-extrabold text-orange-600 mb-4">Active Orders</h1>
         <p className="text-gray-600 mb-6">Track current orders and delivery status in real time.</p>
 
         <div className="space-y-4">
@@ -21,8 +21,8 @@ const OrdersList = () => {
                 <p className="text-sm text-gray-600">Order ID: {order.id}</p>
               </div>
               <div className="mt-2 md:mt-0 flex gap-3 items-center text-sm">
-                <span className="rounded-full bg-white border border-orange-200 px-3 py-1">Ordered {order.ordered}</span>
-                <span className="rounded-full bg-white border border-orange-200 px-3 py-1">ETA {order.eta}</span>
+                <span className="rounded-full bg-white border border-orange-200 text-gray-600 px-3 py-1">Ordered {order.ordered}</span>
+                <span className="rounded-full bg-white border border-orange-200 text-gray-600 px-3 py-1">ETA {order.eta}</span>
                 <span className={`rounded-full px-3 py-1 ${order.status === 'On the way' ? 'bg-blue-100 text-blue-700' : order.status === 'Preparing' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'}`}>
                   {order.status}
                 </span>
