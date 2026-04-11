@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { authService } from '../services/api'
+import toast from 'react-hot-toast'
 
 const Signup = ({ onAuth }) => {
   const navigate = useNavigate()
@@ -43,6 +44,7 @@ const Signup = ({ onAuth }) => {
 
     if (result.success) {
       authService.saveUser(result.user)
+      toast.success('signed up!')
       onAuth && onAuth()
       navigate('/home')
     } else {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { authService } from '../services/api'
-
+import toast from 'react-hot-toast'
 const Login = ({ onAuth }) => {
   const navigate = useNavigate()
   const [role, setRole] = useState('customer')
@@ -41,6 +41,7 @@ const Login = ({ onAuth }) => {
 
     if (result.success) {
       authService.saveUser(result.user)
+      toast.success("login successfully")
       onAuth && onAuth()
       navigate('/home')
     } else {
