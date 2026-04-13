@@ -42,7 +42,7 @@ const Login = ({ onAuth }) => {
     if (result.success) {
       authService.saveUser(result.user)
       toast.success("login successfully")
-      onAuth && onAuth()
+      onAuth && onAuth(result.data.token)
       navigate('/home')
     } else {
       setError(result.error || 'Login failed. Please try again.')
