@@ -45,7 +45,7 @@ const Signup = ({ onAuth }) => {
     if (result.success) {
       authService.saveUser(result.user)
       toast.success('signed up!')
-      onAuth && onAuth()
+      onAuth && onAuth(result.data.token)
       navigate('/home')
     } else {
       setError(result.error || 'Signup failed. Please try again.')

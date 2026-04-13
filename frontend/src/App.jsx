@@ -1,25 +1,24 @@
-import React, { useState } from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  useLocation,
-} from "react-router-dom";
+import React, { useState } from 'react'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 
-import LandingPage from "./pages/landingPage";
-import Home from "./pages/Home";
-import Login from "./pages/login";
-import Signup from "./pages/signup";
-import UserProfile from "./pages/userProfile";
-import OrderHistory from "./pages/orderHistory";
-import OrdersList from "./pages/ordersList";
+import LandingPage from './pages/landingPage'
+import Home from './pages/Home'
+import Login from './pages/login'
+import Signup from './pages/signup'
+import UserProfile from './pages/userProfile'
+import OrderHistory from './pages/orderHistory'
+import OrdersList from './pages/ordersList'
+import RestaurantDetail from './pages/RestaurantDetail'
+import CartPage from './pages/CartPage'
+import CheckoutPage from './pages/CheckoutPage'
 
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
+import Navbar from './components/Navbar'
+import Footer from './components/Footer'
 
-import ProtectedRoute from "./routes/ProtectedRoute";
-import PublicRoute from "./routes/PublicRoute";
-import { Toaster } from "react-hot-toast";
+// ✅ Add these
+import ProtectedRoute from './routes/ProtectedRoute'
+import PublicRoute from './routes/PublicRoute'
+import { Toaster } from 'react-hot-toast'
 
 function NotFound() {
   return (
@@ -42,10 +41,11 @@ function AppContent() {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
   const location = useLocation();
 
-  const handleAuth = () => {
-    localStorage.setItem("token", "dummy");
-    setIsLoggedIn(true);
-  };
+  // ✅ Login handler
+  const handleAuth = (token) => {
+    localStorage.setItem("token", token || "dummy")
+    setIsLoggedIn(true)
+  }
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -54,6 +54,8 @@ function AppContent() {
 
   const isRestaurantDashboard = location.pathname === "/orders";
 
+
+  
   return (
     <>
       {!isRestaurantDashboard && (
@@ -86,6 +88,33 @@ function AppContent() {
           element={
             <ProtectedRoute isLoggedIn={isLoggedIn}>
               <Home />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/restaurant/:id"
+          element={
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
+              <RestaurantDetail />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/cart"
+          element={
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
+              <CartPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/checkout"
+          element={
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
+              <CheckoutPage />
             </ProtectedRoute>
           }
         />
