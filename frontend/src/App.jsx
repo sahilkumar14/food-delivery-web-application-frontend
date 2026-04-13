@@ -52,6 +52,8 @@ function App() {
     setIsLoggedIn(false)
   }
 
+
+  
   return (
     <Router>
       <Navbar isLoggedIn={isLoggedIn} onLogout={handleLogout} />
