@@ -8,6 +8,9 @@ import Signup from './pages/signup'
 import UserProfile from './pages/userProfile'
 import OrderHistory from './pages/orderHistory'
 import OrdersList from './pages/ordersList'
+import RestaurantDetail from './pages/RestaurantDetail'
+import CartPage from './pages/CartPage'
+import CheckoutPage from './pages/CheckoutPage'
 
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
@@ -38,8 +41,8 @@ function App() {
   )
 
   // ✅ Login handler
-  const handleAuth = () => {
-    localStorage.setItem("token", "dummy") // later replace with real token
+  const handleAuth = (token) => {
+    localStorage.setItem("token", token || "dummy")
     setIsLoggedIn(true)
   }
 
@@ -82,6 +85,33 @@ function App() {
           element={
             <ProtectedRoute isLoggedIn={isLoggedIn}>
               <Home />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/restaurant/:id"
+          element={
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
+              <RestaurantDetail />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/cart"
+          element={
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
+              <CartPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/checkout"
+          element={
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
+              <CheckoutPage />
             </ProtectedRoute>
           }
         />

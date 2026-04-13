@@ -4,6 +4,23 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 export const authService = {
   signup: async (name, email, password, role) => {
     try {
+      // For now, simulate signup without backend
+      // TODO: Replace with actual API call when backend is ready
+      if (name && email && password) {
+        // Simulate successful signup
+        return {
+          success: true,
+          data: {
+            name,
+            token: 'dummy-token-' + Date.now()
+          },
+          user: { name, email, role },
+        };
+      } else {
+        throw new Error('Invalid data');
+      }
+
+      /* Original API call - uncomment when backend is ready
       const response = await fetch(`${API_BASE_URL}/reg`, {
         method: 'POST',
         headers: {
@@ -13,7 +30,7 @@ export const authService = {
           name,
           email,
           password,
-          role, // Add role support
+          role,
         }),
       });
 
@@ -28,6 +45,7 @@ export const authService = {
         data,
         user: { name, email, role },
       };
+      */
     } catch (error) {
       return {
         success: false,
@@ -38,6 +56,23 @@ export const authService = {
 
   login: async (email, password, role) => {
     try {
+      // For now, simulate login without backend
+      // TODO: Replace with actual API call when backend is ready
+      if (email && password) {
+        // Simulate successful login
+        return {
+          success: true,
+          data: {
+            name: email.split('@')[0], // Use email prefix as name
+            token: 'dummy-token-' + Date.now()
+          },
+          user: { name: email.split('@')[0], email, role },
+        };
+      } else {
+        throw new Error('Invalid credentials');
+      }
+
+      /* Original API call - uncomment when backend is ready
       const response = await fetch(`${API_BASE_URL}/login`, {
         method: 'POST',
         headers: {
@@ -46,7 +81,7 @@ export const authService = {
         body: JSON.stringify({
           email,
           password,
-          role, // Add role support
+          role,
         }),
       });
 
@@ -61,6 +96,7 @@ export const authService = {
         data,
         user: { name: data.data.name, email, role },
       };
+      */
     } catch (error) {
       return {
         success: false,
