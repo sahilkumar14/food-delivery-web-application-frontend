@@ -1,21 +1,25 @@
-import React, { useState } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import React, { useState } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 
-import LandingPage from './pages/landingPage'
-import Home from './pages/Home'
-import Login from './pages/login'
-import Signup from './pages/signup'
-import UserProfile from './pages/userProfile'
-import OrderHistory from './pages/orderHistory'
-import OrdersList from './pages/ordersList'
+import LandingPage from "./pages/landingPage";
+import Home from "./pages/Home";
+import Login from "./pages/login";
+import Signup from "./pages/signup";
+import UserProfile from "./pages/userProfile";
+import OrderHistory from "./pages/orderHistory";
+import OrdersList from "./pages/ordersList";
 
-import Navbar from './components/Navbar'
-import Footer from './components/Footer'
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 
-// ✅ Add these
-import ProtectedRoute from './routes/ProtectedRoute'
-import PublicRoute from './routes/PublicRoute'
-import { Toaster } from 'react-hot-toast'
+import ProtectedRoute from "./routes/ProtectedRoute";
+import PublicRoute from "./routes/PublicRoute";
+import { Toaster } from "react-hot-toast";
 
 function NotFound() {
   return (
@@ -23,39 +27,40 @@ function NotFound() {
       <div className="text-center">
         <h1 className="text-5xl font-bold text-orange-600">404</h1>
         <p className="mt-2">Page not found.</p>
-        <a href="/" className="mt-4 inline-block px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition">
+        <a
+          href="/"
+          className="mt-4 inline-block px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
+        >
           Go Home
         </a>
       </div>
     </div>
-  )
+  );
 }
 
-function App() {
-  // ✅ Fix: persist login using localStorage
-  const [isLoggedIn, setIsLoggedIn] = useState(
-    !!localStorage.getItem("token")
-  )
+function AppContent() {
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
+  const location = useLocation();
 
-  // ✅ Login handler
   const handleAuth = () => {
-    localStorage.setItem("token", "dummy") // later replace with real token
-    setIsLoggedIn(true)
-  }
+    localStorage.setItem("token", "dummy");
+    setIsLoggedIn(true);
+  };
 
-  // ✅ Logout handler
   const handleLogout = () => {
-    localStorage.removeItem("token")
-    setIsLoggedIn(false)
-  }
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
+  };
+
+  const isRestaurantDashboard = location.pathname === "/orders";
 
   return (
-    <Router>
-      <Navbar isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+    <>
+      {!isRestaurantDashboard && (
+        <Navbar isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+      )}
 
       <Routes>
-
-        {/* 🌐 Public Routes */}
         <Route path="/" element={<LandingPage />} />
 
         <Route
@@ -76,7 +81,6 @@ function App() {
           }
         />
 
-        {/* 🔒 Protected Routes */}
         <Route
           path="/home"
           element={
@@ -113,14 +117,21 @@ function App() {
           }
         />
 
-        {/* ❌ 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>
 
+      {!isRestaurantDashboard && <Footer />}
       <Toaster position="top-right" />
-      <Footer />
-    </Router>
-  )
+    </>
+  );
 }
 
-export default App
+function App() {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
+  );
+}
+
+export default App;
