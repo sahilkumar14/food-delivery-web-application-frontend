@@ -26,7 +26,7 @@ const Navbar = ({ isLoggedIn, onLogout }) => {
           <div className="bg-orange-500 text-white px-3 py-2 rounded-lg font-bold">
             🍔
           </div>
-          <h1 className="text-xl font-bold text-gray-800">FoodExpress</h1>
+          <h1 className="text-xl font-bold text-gray-800">UrbanEats</h1>
         </Link>
 
         {/* 🔷 Desktop Menu */}

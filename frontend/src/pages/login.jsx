@@ -43,7 +43,15 @@ const Login = ({ onAuth }) => {
       authService.saveUser(result.user)
       toast.success("login successfully")
       onAuth && onAuth(result.data.token)
-      navigate('/home')
+      
+      // Navigate based on role
+      if (result.user.role === 'restaurant') {
+        navigate('/orders')
+      } else if (result.user.role === 'agent') {
+        navigate('/delivery-agent-home')
+      } else {
+        navigate('/home')
+      }
     } else {
       setError(result.error || 'Login failed. Please try again.')
     }
