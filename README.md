@@ -79,14 +79,11 @@ food-delivery-web-app/
 🛠️ Admin dashboard
 🤝 Contributing
 
-Contributions are welcome!
 
-fork → clone → create branch → commit → push → PR
-📄 License
-
-MIT License © 2026
-
-👨‍💻 Author
+👨‍💻 Collaborators:
 
 Sahil Kumar
+Saniya Gupta
+Samay Gupta
+ronak Jindal
 
