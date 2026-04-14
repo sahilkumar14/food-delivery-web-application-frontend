@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 
 import LandingPage from './pages/landingPage'
 import Home from './pages/Home'
@@ -11,6 +11,7 @@ import OrdersList from './pages/ordersList'
 import RestaurantDetail from './pages/RestaurantDetail'
 import CartPage from './pages/CartPage'
 import CheckoutPage from './pages/CheckoutPage'
+import DeliveryAgentHome from './pages/deliveryAgentHome'
 
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
@@ -51,17 +52,24 @@ function AppContent() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setIsLoggedIn(false);
   };
 
+  // Wrapper component for OrdersList to pass logout handler
+  const OrdersListWithLogout = () => <OrdersList onLogout={handleLogout} />;
+
+  // Wrapper component for DeliveryAgentHome to pass logout handler
+  const DeliveryAgentHomeWithLogout = () => <DeliveryAgentHome onLogout={handleLogout} />;
+
   const isRestaurantDashboard = location.pathname === "/orders";
+  const isAgentDashboard = location.pathname === "/delivery-agent-home";
 
 
   
   return (
     <>
-      {/* Navbar */}
-      {!isRestaurantDashboard && (
+      {!isRestaurantDashboard && !isAgentDashboard && (
         <Navbar isLoggedIn={isLoggedIn} onLogout={handleLogout} />
       )}
 
@@ -90,7 +98,7 @@ function AppContent() {
         <Route
           path="/home"
           element={
-            <ProtectedRoute isLoggedIn={isLoggedIn}>
+            <ProtectedRoute isLoggedIn={isLoggedIn} requiredRole="customer">
               <Home />
             </ProtectedRoute>
           }
@@ -99,7 +107,7 @@ function AppContent() {
         <Route
           path="/restaurant/:id"
           element={
-            <ProtectedRoute isLoggedIn={isLoggedIn}>
+            <ProtectedRoute isLoggedIn={isLoggedIn} requiredRole="customer">
               <RestaurantDetail />
             </ProtectedRoute>
           }
@@ -108,7 +116,7 @@ function AppContent() {
         <Route
           path="/cart"
           element={
-            <ProtectedRoute isLoggedIn={isLoggedIn}>
+            <ProtectedRoute isLoggedIn={isLoggedIn} requiredRole="customer">
               <CartPage />
             </ProtectedRoute>
           }
@@ -117,7 +125,7 @@ function AppContent() {
         <Route
           path="/checkout"
           element={
-            <ProtectedRoute isLoggedIn={isLoggedIn}>
+            <ProtectedRoute isLoggedIn={isLoggedIn} requiredRole="customer">
               <CheckoutPage />
             </ProtectedRoute>
           }
@@ -126,7 +134,7 @@ function AppContent() {
         <Route
           path="/profile"
           element={
-            <ProtectedRoute isLoggedIn={isLoggedIn}>
+            <ProtectedRoute isLoggedIn={isLoggedIn} requiredRole="customer">
               <UserProfile />
             </ProtectedRoute>
           }
@@ -135,7 +143,7 @@ function AppContent() {
         <Route
           path="/history"
           element={
-            <ProtectedRoute isLoggedIn={isLoggedIn}>
+            <ProtectedRoute isLoggedIn={isLoggedIn} requiredRole="customer">
               <OrderHistory />
             </ProtectedRoute>
           }
@@ -144,8 +152,17 @@ function AppContent() {
         <Route
           path="/orders"
           element={
-            <ProtectedRoute isLoggedIn={isLoggedIn}>
-              <OrdersList />
+            <ProtectedRoute isLoggedIn={isLoggedIn} requiredRole="restaurant">
+              <OrdersListWithLogout />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/delivery-agent-home"
+          element={
+            <ProtectedRoute isLoggedIn={isLoggedIn} requiredRole="agent">
+              <DeliveryAgentHomeWithLogout />
             </ProtectedRoute>
           }
         />

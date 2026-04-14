@@ -84,7 +84,7 @@ const RestaurantDetail = () => {
             onClick={() => navigate(-1)}
             className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg"
           >
-            Back to Restaurants
+            Back to Home
           </Button>
         </div>
       </div>

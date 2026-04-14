@@ -2,19 +2,29 @@ import { MapPin, User, Clock3, Truck, Package } from "lucide-react";
 
 const statusMap = {
   pending: {
-    label: "pending",
+    label: "Pending",
     className: "bg-yellow-100 text-yellow-700",
     icon: <Clock3 size={15} />,
   },
-  preparing: {
-    label: "preparing",
+  confirmed: {
+    label: "Preparing",
     className: "bg-blue-100 text-blue-700",
     icon: <Package size={15} />,
   },
   out_for_delivery: {
-    label: "out_for_delivery",
+    label: "Out for Delivery",
     className: "bg-orange-100 text-orange-700",
     icon: <Truck size={15} />,
+  },
+  delivered: {
+    label: "Delivered",
+    className: "bg-green-100 text-green-700",
+    icon: <Package size={15} />,
+  },
+  cancelled: {
+    label: "Cancelled",
+    className: "bg-red-100 text-red-700",
+    icon: <Clock3 size={15} />,
   },
 };
 

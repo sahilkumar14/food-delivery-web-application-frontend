@@ -2,36 +2,51 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 // Auth Service
 export const authService = {
-  signup: async (name, email, password, role) => {
+  signup: async (formData, role) => {
     try {
-      // For now, simulate signup without backend
-      // TODO: Replace with actual API call when backend is ready
-      if (name && email && password) {
-        // Simulate successful signup
-        return {
-          success: true,
-          data: {
-            name,
-            token: 'dummy-token-' + Date.now()
-          },
-          user: { name, email, role },
-        };
-      } else {
-        throw new Error('Invalid data');
+      let endpoint, body;
+
+      switch (role) {
+        case 'customer':
+          endpoint = '/reg';
+          body = {
+            name: formData.fullName,
+            email: formData.email,
+            password: formData.password,
+            mob: formData.mobile,
+            dob: formData.dob,
+            address: formData.address
+          };
+          break;
+        case 'restaurant':
+          endpoint = '/restaurantSignup';
+          body = {
+            name: formData.fullName,
+            email: formData.email,
+            password: formData.password,
+            location: formData.location
+          };
+          break;
+        case 'agent':
+          endpoint = '/agentCreate';
+          body = {
+            name: formData.fullName,
+            email: formData.email,
+            password: formData.password,
+            phone: formData.mobile,
+            vehicleNo: formData.vehicleNo
+          };
+          break;
+        default:
+          throw new Error('Invalid role');
       }
 
-      /* Original API call - uncomment when backend is ready
-      const response = await fetch(`${API_BASE_URL}/reg`, {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-          role,
-        }),
+        body: JSON.stringify(body),
       });
 
       const data = await response.json();
@@ -43,9 +58,13 @@ export const authService = {
       return {
         success: true,
         data,
-        user: { name, email, role },
+        user: {
+          id: data?.data?._id || null,
+          name: formData.fullName,
+          email: formData.email,
+          role,
+        },
       };
-      */
     } catch (error) {
       return {
         success: false,
@@ -56,24 +75,23 @@ export const authService = {
 
   login: async (email, password, role) => {
     try {
-      // For now, simulate login without backend
-      // TODO: Replace with actual API call when backend is ready
-      if (email && password) {
-        // Simulate successful login
-        return {
-          success: true,
-          data: {
-            name: email.split('@')[0], // Use email prefix as name
-            token: 'dummy-token-' + Date.now()
-          },
-          user: { name: email.split('@')[0], email, role },
-        };
-      } else {
-        throw new Error('Invalid credentials');
+      let endpoint;
+
+      switch (role) {
+        case 'customer':
+          endpoint = '/login';
+          break;
+        case 'restaurant':
+          endpoint = '/restaurantLogin';
+          break;
+        case 'agent':
+          endpoint = '/agentLogin';
+          break;
+        default:
+          throw new Error('Invalid role');
       }
 
-      /* Original API call - uncomment when backend is ready
-      const response = await fetch(`${API_BASE_URL}/login`, {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -81,7 +99,6 @@ export const authService = {
         body: JSON.stringify({
           email,
           password,
-          role,
         }),
       });
 
@@ -94,9 +111,13 @@ export const authService = {
       return {
         success: true,
         data,
-        user: { name: data.data.name, email, role },
+        user: { 
+          id: data.data._id,
+          name: data.data.name || data.data.email, 
+          email, 
+          role 
+        },
       };
-      */
     } catch (error) {
       return {
         success: false,
@@ -122,6 +143,33 @@ export const authService = {
 
   saveUser: (user) => {
     localStorage.setItem('user', JSON.stringify(user));
+  },
+
+  getRestaurantOrders: async (restaurantId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/restaurant/orders/${restaurantId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to fetch orders');
+      }
+
+      return {
+        success: true,
+        data: data.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
   },
 };
 
