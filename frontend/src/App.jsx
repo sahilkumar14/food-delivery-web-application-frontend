@@ -39,7 +39,9 @@ function NotFound() {
 }
 
 function AppContent() {
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
+  const [isLoggedIn, setIsLoggedIn] = useState(
+    !!localStorage.getItem("token")
+  );
   const location = useLocation();
 
   // ✅ Login handler
@@ -71,6 +73,7 @@ function AppContent() {
         <Navbar isLoggedIn={isLoggedIn} onLogout={handleLogout} />
       )}
 
+      {/* Routes */}
       <Routes>
         <Route path="/" element={<LandingPage />} />
 
@@ -164,10 +167,23 @@ function AppContent() {
           }
         />
 
+        {/* ✅ Restaurant Dashboard */}
+        <Route
+          path="/restaurant"
+          element={
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
+              <RestaurantHome />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>
 
+      {/* Footer */}
       {!isRestaurantDashboard && <Footer />}
+
       <Toaster position="top-right" />
     </>
   );
