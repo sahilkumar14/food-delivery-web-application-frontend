@@ -16,7 +16,7 @@ const RestaurantTopbar = ({ onLogout }) => {
         <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
           🍔
         </div>
-        <h2 className="text-[20px] font-semibold">FoodExpress</h2>
+        <h2 className="text-[20px] font-semibold">UrbanEats</h2>
       </Link>
 
       <div className="flex items-center gap-8 text-[16px] font-medium">

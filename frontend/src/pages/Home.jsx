@@ -1,15 +1,28 @@
-import React, { useState, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Hero from "../components/Hero";
 import CategorySection from "../components/CategorySection";
 import FeaturedRestaurants from "../components/FeaturedRestaurants";
-import restaurants from "../data/restaurants";
+import { authService } from "../services/api";
+import { adaptRestaurant } from "../utils/restaurantAdapter";
 
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [restaurants, setRestaurants] = useState([]);
+
+  useEffect(() => {
+    const fetchRestaurants = async () => {
+      const result = await authService.getRestaurants();
+
+      if (result.success) {
+        setRestaurants((result.data || []).map(adaptRestaurant));
+      }
+    };
+
+    fetchRestaurants();
+  }, []);
 
   const handleSearch = () => {
-    // placeholder: search is live via filteredRestaurants; button just logs
     console.log("Searching for", searchQuery);
   };
 
@@ -19,16 +32,16 @@ const Home = () => {
     return restaurants.filter((item) => {
       const categoryMatch =
         selectedCategory === "all" ||
-        item.category.toLowerCase() === selectedCategory.toLowerCase();
+        (item.category || "all").toLowerCase() === selectedCategory.toLowerCase();
 
       const searchMatch =
         lowerQuery === "" ||
         item.name.toLowerCase().includes(lowerQuery) ||
-        item.cuisine.toLowerCase().includes(lowerQuery);
+        (item.cuisine || "").toLowerCase().includes(lowerQuery);
 
       return categoryMatch && searchMatch;
     });
-  }, [searchQuery, selectedCategory]);
+  }, [restaurants, searchQuery, selectedCategory]);
 
   return (
     <div>

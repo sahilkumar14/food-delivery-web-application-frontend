@@ -2,6 +2,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 // Auth Service
 export const authService = {
+
   signup: async (formData, role) => {
     try {
       let endpoint, body;
@@ -18,6 +19,7 @@ export const authService = {
             address: formData.address
           };
           break;
+
         case 'restaurant':
           endpoint = '/restaurantSignup';
           body = {
@@ -27,6 +29,7 @@ export const authService = {
             location: formData.location
           };
           break;
+
         case 'agent':
           endpoint = '/agentCreate';
           body = {
@@ -37,23 +40,19 @@ export const authService = {
             vehicleNo: formData.vehicleNo
           };
           break;
+
         default:
           throw new Error('Invalid role');
       }
 
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
 
       const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Signup failed');
-      }
+      if (!response.ok) throw new Error(data.message || 'Signup failed');
 
       return {
         success: true,
@@ -62,14 +61,15 @@ export const authService = {
           id: data?.data?._id || null,
           name: formData.fullName,
           email: formData.email,
+          mob: formData.mobile || '',
+          address: formData.address || '',
+          location: formData.location || '',
           role,
         },
       };
+
     } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-      };
+      return { success: false, error: error.message };
     }
   },
 
@@ -78,56 +78,41 @@ export const authService = {
       let endpoint;
 
       switch (role) {
-        case 'customer':
-          endpoint = '/login';
-          break;
-        case 'restaurant':
-          endpoint = '/restaurantLogin';
-          break;
-        case 'agent':
-          endpoint = '/agentLogin';
-          break;
-        default:
-          throw new Error('Invalid role');
+        case 'customer': endpoint = '/login'; break;
+        case 'restaurant': endpoint = '/restaurantLogin'; break;
+        case 'agent': endpoint = '/agentLogin'; break;
+        default: throw new Error('Invalid role');
       }
 
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
-      }
+      if (!response.ok) throw new Error(data.message || 'Login failed');
 
       return {
         success: true,
         data,
-        user: { 
+        user: {
           id: data.data._id,
-          name: data.data.name || data.data.email, 
-          email, 
-          role 
+          name: data.data.name || data.data.email,
+          email: data.data.email || email,
+          mob: data.data.mob || data.data.phone || '',
+          address: data.data.address || '',
+          location: data.data.location || '',
+          role
         },
       };
+
     } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-      };
+      return { success: false, error: error.message };
     }
   },
 
   logout: () => {
-    // Clear any stored auth tokens
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
   },
@@ -135,42 +120,180 @@ export const authService = {
   getCurrentUser: () => {
     try {
       const user = localStorage.getItem('user');
-      return user ? JSON.parse(user) : null;
+      if (!user) return null;
+
+      const parsed = JSON.parse(user);
+      return { ...parsed, id: parsed.id || parsed._id || null };
     } catch {
       return null;
     }
   },
 
   saveUser: (user) => {
-    localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem(
+      'user',
+      JSON.stringify({
+        ...user,
+        id: user.id || user._id || null,
+      })
+    );
   },
+
+  // ===================== ORDERS =====================
 
   getRestaurantOrders: async (restaurantId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/restaurant/orders/${restaurantId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const res = await fetch(`${API_BASE_URL}/restaurant/orders/${restaurantId}`);
+      const data = await res.json();
 
-      const data = await response.json();
+      if (!res.ok) throw new Error(data.message);
+      return { success: true, data: data.data };
 
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to fetch orders');
-      }
-
-      return {
-        success: true,
-        data: data.data,
-      };
     } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-      };
+      return { success: false, error: error.message };
     }
   },
+
+  getRestaurantProfile: async (restaurantId) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/restaurants/${restaurantId}`);
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message);
+      return { success: true, data: data.data };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
+
+  getRestaurantMenu: async (restaurantId) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/restaurant/${restaurantId}/menu`);
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message);
+      return { success: true, data: data.data };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
+
+  placeOrder: async (orderPayload) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderPayload),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      return { success: true, data: data.data };
+
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
+
+  getAvailableAgentOrders: async (agentId) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/agent/orders/available/${agentId}`);
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message);
+      return { success: true, data: data.data };
+
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
+
+  getAgentActiveOrders: async (agentId) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/agent/orders/active/${agentId}`);
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message);
+      return { success: true, data: data.data };
+
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
+
+  updateAgentOrderDecision: async (orderId, agentId, action) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/agent/orders/${orderId}/decision`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ agentId, action }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      return { success: true, data: data.data };
+
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
+
+  // ===================== MENU =====================
+
+  addMenuItem: async (menuData) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/addMenu`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(menuData),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      return { success: true, data: data.data };
+
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
+
+  deleteMenuItem: async (itemId) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/menu/${itemId}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      return { success: true };
+
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
+
+  updateMenuItem: async (itemId, updatedData) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/menu/${itemId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedData),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      return { success: true, data: data.data };
+
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
+
 };
 
 export default authService;

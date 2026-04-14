@@ -9,9 +9,11 @@ import UserProfile from './pages/userProfile'
 import OrderHistory from './pages/orderHistory'
 import OrdersList from './pages/ordersList'
 import RestaurantDetail from './pages/RestaurantDetail'
+import RestaurantHome from './pages/restaurantHome'
 import CartPage from './pages/CartPage'
 import CheckoutPage from './pages/CheckoutPage'
 import DeliveryAgentHome from './pages/deliveryAgentHome'
+import DeliveryAgentProfile from './pages/deliveryAgentProfile'
 
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
@@ -23,7 +25,7 @@ import { Toaster } from 'react-hot-toast'
 
 function NotFound() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-gray-100 text-gray-800">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-orange-50 to-gray-100 text-gray-800">
       <div className="text-center">
         <h1 className="text-5xl font-bold text-orange-600">404</h1>
         <p className="mt-2">Page not found.</p>
@@ -62,14 +64,17 @@ function AppContent() {
   // Wrapper component for DeliveryAgentHome to pass logout handler
   const DeliveryAgentHomeWithLogout = () => <DeliveryAgentHome onLogout={handleLogout} />;
 
+  // Wrapper component for DeliveryAgentProfile to pass logout handler
+  const DeliveryAgentProfileWithLogout = () => <DeliveryAgentProfile onLogout={handleLogout} />;
+
   const isRestaurantDashboard = location.pathname === "/orders";
-  const isAgentDashboard = location.pathname === "/delivery-agent-home";
+  const isAgentRoute = location.pathname.startsWith("/delivery-agent");
 
 
   
   return (
     <>
-      {!isRestaurantDashboard && !isAgentDashboard && (
+      {!isRestaurantDashboard && !isAgentRoute && (
         <Navbar isLoggedIn={isLoggedIn} onLogout={handleLogout} />
       )}
 
@@ -167,6 +172,15 @@ function AppContent() {
           }
         />
 
+        <Route
+          path="/delivery-agent-profile"
+          element={
+            <ProtectedRoute isLoggedIn={isLoggedIn} requiredRole="agent">
+              <DeliveryAgentProfileWithLogout />
+            </ProtectedRoute>
+          }
+        />
+
         {/* ✅ Restaurant Dashboard */}
         <Route
           path="/restaurant"
@@ -182,7 +196,7 @@ function AppContent() {
       </Routes>
 
       {/* Footer */}
-      {!isRestaurantDashboard && <Footer />}
+      {!isRestaurantDashboard && !isAgentRoute && <Footer />}
 
       <Toaster position="top-right" />
     </>

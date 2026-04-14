@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCart } from '../contexts/CartContext';
 import Button from '../components/Button';
 import { useNavigate } from 'react-router-dom';
@@ -18,11 +18,11 @@ const CheckoutPage = () => {
 
   const [isProcessing, setIsProcessing] = useState(false);
 
-  if (items.length === 0) {
-    navigate('/cart');
-    return null;
-  }
-
+  useEffect(() => {
+    if (items.length === 0) {
+      navigate('/cart');
+    }
+  }, [items]);
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -35,25 +35,52 @@ const CheckoutPage = () => {
     e.preventDefault();
     setIsProcessing(true);
 
-    // Simulate API call
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const user = JSON.parse(localStorage.getItem("user"));
 
-      // Here you would typically send the order to your backend
-      const orderData = {
-        items,
-        total: getTotal(),
-        customer: formData,
-        orderDate: new Date().toISOString()
+      if (!user?._id) {
+        throw new Error("User not logged in");
+      }
+
+      if (!items[0]?.restaurantId) {
+        throw new Error("Restaurant info missing");
+      }
+
+      const orderPayload = {
+        userId: user._id,
+        restaurantId: items[0].restaurantId,
+        items: items.map(item => ({
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price
+        })),
+        totalPrice: getTotal(),
+        address: formData.address
       };
 
-      console.log('Order placed:', orderData);
+      console.log("Sending order:", orderPayload);
+
+      const res = await fetch("http://localhost:5000/order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(orderPayload)
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Order failed");
+      }
 
       clearCart();
-      toast.success('Order placed successfully!');
-      navigate('/home');
+      toast.success("Order placed successfully!");
+      navigate("/home");
+
     } catch (error) {
-      toast.error('Failed to place order. Please try again.');
+      console.error(error);
+      toast.error(error.message);
     } finally {
       setIsProcessing(false);
     }
@@ -191,6 +218,7 @@ const CheckoutPage = () => {
 
         <div className="mt-6 text-center">
           <Button
+            type="button"
             onClick={() => navigate('/cart')}
             className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg"
           >

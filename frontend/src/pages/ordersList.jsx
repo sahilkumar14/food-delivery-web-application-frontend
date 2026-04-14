@@ -7,11 +7,13 @@ import OrderDetailPlaceholder from "../components/OrderDetailPlaceholder";
 import { authService } from "../services/api";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { RestaurantHomeContent } from "./restaurantHome";
 
 const OrdersList = ({ onLogout }) => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("orders");
+  const [activeTab, setActiveTab] = useState("home");
   const [orders, setOrders] = useState([]);
+  const [restaurant, setRestaurant] = useState(null);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     todayRevenue: 0,
@@ -32,23 +34,38 @@ const OrdersList = ({ onLogout }) => {
     const fetchOrders = async () => {
       const user = authService.getCurrentUser();
       if (user && user.role === 'restaurant' && user.id) {
-        const result = await authService.getRestaurantOrders(user.id);
-        if (result.success) {
-          setOrders(result.data);
+        setRestaurant({
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          location: user.location,
+        });
+
+        const [ordersResult, profileResult] = await Promise.all([
+          authService.getRestaurantOrders(user.id),
+          authService.getRestaurantProfile(user.id),
+        ]);
+
+        if (profileResult.success) {
+          setRestaurant(profileResult.data);
+        }
+
+        if (ordersResult.success) {
+          setOrders(ordersResult.data);
           
           // Calculate stats
           const today = new Date();
           today.setHours(0, 0, 0, 0);
           
-          const todayOrders = result.data.filter(order => 
+          const todayOrders = ordersResult.data.filter(order => 
             new Date(order.createdAt) >= today
           );
           
-          const pendingOrders = result.data.filter(order => 
+          const pendingOrders = ordersResult.data.filter(order => 
             order.status === 'Pending'
           );
           
-          const completedOrders = result.data.filter(order => 
+          const completedOrders = ordersResult.data.filter(order => 
             order.status === 'Delivered'
           );
           
@@ -61,7 +78,11 @@ const OrdersList = ({ onLogout }) => {
             completedOrders: completedOrders.length,
           });
         } else {
-          toast.error(result.error || 'Failed to fetch orders');
+          toast.error(ordersResult.error || 'Failed to fetch orders');
+        }
+
+        if (!profileResult.success) {
+          toast.error(profileResult.error || 'Failed to fetch restaurant profile');
         }
       }
       setLoading(false);
@@ -134,7 +155,7 @@ const OrdersList = ({ onLogout }) => {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex">
-      <RestaurantSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <RestaurantSidebar activeTab={activeTab} setActiveTab={setActiveTab} restaurant={restaurant} />
 
       <div className="flex-1">
         <RestaurantTopbar onLogout={handleLogout} />
@@ -143,6 +164,7 @@ const OrdersList = ({ onLogout }) => {
           <div className="border border-border bg-card rounded-sm">
             <div className="border-b border-border px-8 py-6 flex items-center justify-between">
               <h1 className="text-[28px] font-semibold">
+                {activeTab === "home" && "Home"}
                 {activeTab === "orders" && "Orders"}
                 {activeTab === "menu" && "Menu Items"}
                 {activeTab === "statistics" && "Statistics"}
@@ -154,6 +176,8 @@ const OrdersList = ({ onLogout }) => {
             </div>
 
             <div className="p-8">
+              {activeTab === "home" && <RestaurantHomeContent />}
+
               {activeTab === "orders" && (
                 <div className="grid grid-cols-12 gap-6">
                   <div className="col-span-7 space-y-6">
