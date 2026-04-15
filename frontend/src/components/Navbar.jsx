@@ -50,7 +50,7 @@ const Navbar = ({ isLoggedIn, onLogout }) => {
           ) : (
             <>
               <Link to="/home" className={navLink}>Home</Link>
-              <Link to="/orders" className={navLink}>Orders</Link>
+              {/* <Link to="/orders" className={navLink}>Orders</Link> */}
               <Link to="/history" className={navLink}>History</Link>
 
               {/* 🛒 Cart with Badge */}

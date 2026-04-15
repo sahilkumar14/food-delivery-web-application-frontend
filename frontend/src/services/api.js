@@ -64,6 +64,7 @@ export const authService = {
           name: formData.fullName,
           email: formData.email,
           mob: formData.mobile || '',
+          dob: formData.dob || null,
           address: formData.address || '',
           addressCoordinates: formData.addressCoordinates || data?.data?.addressCoordinates || null,
           location: formData.location || '',
@@ -104,8 +105,7 @@ export const authService = {
           id: data.data._id,
           name: data.data.name || data.data.email,
           email: data.data.email || email,
-          mob: data.data.mob || data.data.phone || '',
-          address: data.data.address || '',
+          mob: data.data.mob || data.data.phone || '',          dob: data.data.dob || null,          address: data.data.address || '',
           addressCoordinates: data.data.addressCoordinates || null,
           location: data.data.location || '',
           locationCoordinates: data.data.locationCoordinates || null,
@@ -143,6 +143,21 @@ export const authService = {
         id: user.id || user._id || null,
       })
     );
+  },
+
+  updateUser: async (userId, payload) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/user/${userId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      return { success: true, data: data.data };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
   },
 
   getRestaurants: async () => {
@@ -253,6 +268,18 @@ export const authService = {
 
       return { success: true, data: data.data };
 
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
+
+  getUserOrders: async (userId) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/user/orders/${userId}`);
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message);
+      return { success: true, data: data.data };
     } catch (error) {
       return { success: false, error: error.message };
     }

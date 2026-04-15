@@ -1,66 +1,130 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
+import { authService } from '../services/api'
 
 const UserProfile = () => {
-  const user = {
-    name: 'Alex Sterling',
-    email: 'alex.sterling@premium.com',
-    phone: '+1 (555) 234-8890',
-    dob: 'May 14, 1992',
-    membership: 'Gold Member',
-    status: 'Verified Account',
-    totalOrders: 134,
-    addresses: [
-      {
-        label: 'Home',
-        line1: '4522 Oakwood Heights Dr.',
-        line2: 'Apartment 48',
-        city: 'Austin, TX 78701',
-        primary: true
-      },
-      {
-        label: 'Office',
-        line1: '800 Congress Ave.',
-        line2: 'Suite 1200',
-        city: 'Austin, TX 78701',
-        primary: false
-      },
-      {
-        label: "Parent's House",
-        line1: '1290 Whisper Lane',
-        line2: '',
-        city: 'Round Rock, TX 78664',
-        primary: false
-      }
-    ],
-    benefits: [
-      {
-        title: 'Free Delivery',
-        desc: 'Unlimited on all orders above $25',
-        color: 'bg-amber-100',
-        text: 'text-amber-700'
-      },
-      {
-        title: 'Exclusive Access',
-        desc: 'Priority booking for Michelin events',
-        color: 'bg-sky-100',
-        text: 'text-sky-700'
-      },
-      {
-        title: '10% Cashback',
-        desc: 'Earn points on every premium order',
-        color: 'bg-emerald-100',
-        text: 'text-emerald-700'
-      },
-      {
-        title: 'Concierge',
-        desc: '24/7 priority support line',
-        color: 'bg-violet-100',
-        text: 'text-violet-700'
-      }
-    ]
+  const [user, setUser] = useState(null)
+  const [editing, setEditing] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
+  const [formData, setFormData] = useState({
+    name: '',
+    phone: '',
+    dob: '',
+    address: ''
+  })
+
+  const formatFormDob = (dob) => {
+    if (!dob) return ''
+    const date = new Date(dob)
+    return Number.isNaN(date.getTime()) ? dob : date.toISOString().split('T')[0]
   }
+
+  useEffect(() => {
+    const currentUser = authService.getCurrentUser()
+    setUser(currentUser)
+  }, [])
+
+  useEffect(() => {
+    if (!user) return
+    setFormData({
+      name: user.name || '',
+      phone: user.mob || user.phone || '',
+      dob: formatFormDob(user.dob),
+      address: user.address || ''
+    })
+  }, [user])
+
+  const handleFormChange = (event) => {
+    const { name, value } = event.target
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+  }
+
+  const handleCancelEdit = () => {
+    setEditing(false)
+    if (user) {
+      setFormData({
+        name: user.name || '',
+        phone: user.mob || user.phone || '',
+        dob: formatFormDob(user.dob),
+        address: user.address || ''
+      })
+    }
+  }
+
+  const handleSaveProfile = async () => {
+    if (!user?.id) return
+    setSaving(true)
+    setSaveError('')
+
+    const payload = {
+      name: formData.name,
+      mob: formData.phone,
+      dob: formData.dob || null,
+      address: formData.address
+    }
+
+    const result = await authService.updateUser(user.id, payload)
+
+    if (!result.success) {
+      setSaveError(result.error || 'Failed to update profile')
+      setSaving(false)
+      return
+    }
+
+    const updatedUser = {
+      ...user,
+      ...result.data,
+      role: user.role
+    }
+
+    authService.saveUser(updatedUser)
+    setUser(updatedUser)
+    setEditing(false)
+    setSaving(false)
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-orange-50 px-4 py-8 md:px-10 md:py-12">
+        <div className="mx-auto max-w-4xl rounded-3xl bg-white p-10 shadow-lg text-center">
+          <h1 className="text-2xl font-semibold text-slate-900">Profile not available</h1>
+          <p className="mt-4 text-sm text-slate-500">
+            Please log in to view your account details.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  const addresses = user.address
+    ? [
+        {
+          label: 'Primary',
+          line1: user.address,
+          line2: '',
+          city: '',
+          primary: true
+        }
+      ]
+    : []
+
+  const phone = user.mob || user.phone || 'Not available'
+  const email = user.email || 'Not provided'
+  const name = user.name || 'User'
+
+  const membership = user.role === 'agent'
+    ? 'Delivery Agent'
+    : user.role === 'restaurant'
+    ? 'Restaurant'
+    : 'Customer'
+
+  const status = user.address ? 'Verified Account' : 'Incomplete Profile'
+  const totalOrders = user.totalOrders || 0
+  const benefits = user.benefits || []
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-gray-100 px-4 py-8 md:px-10 md:py-12">
@@ -81,7 +145,7 @@ const UserProfile = () => {
             </div>
             <div className="inline-flex items-center gap-3 rounded-full border border-orange-200 bg-orange-50 px-4 py-2 text-orange-700 shadow-sm">
               <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
-              {user.status}
+              {status}
             </div>
           </div>
 
@@ -89,16 +153,16 @@ const UserProfile = () => {
             <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-[0_0_15px_rgba(255,102,0,0.6)] hover:border-orange-500">
               <div className="flex items-center gap-5">
                 <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-orange-500 text-3xl font-bold text-white shadow-md">
-                  {user.name
+                  {(user.name || 'User')
                     .split(' ')
-                    .map((name) => name[0])
+                    .map((part) => part[0] || '')
                     .join('')}
                 </div>
                 <div>
-                  <h2 className="text-2xl font-semibold text-slate-900">{user.name}</h2>
-                  <p className="text-sm text-slate-500">{user.email}</p>
+                  <h2 className="text-2xl font-semibold text-slate-900">{name}</h2>
+                  <p className="text-sm text-slate-500">{email}</p>
                   <p className="mt-2 inline-flex rounded-full bg-orange-100 px-3 py-1 text-sm font-medium text-orange-700">
-                    {user.membership}
+                    {membership}
                   </p>
                 </div>
               </div>
@@ -106,19 +170,19 @@ const UserProfile = () => {
               <div className="mt-8 grid gap-4 sm:grid-cols-2">
                 <div className="rounded-3xl bg-orange-50 p-4">
                   <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Phone</p>
-                  <p className="mt-2 text-base font-medium text-slate-900">{user.phone}</p>
+                  <p className="mt-2 text-base font-medium text-slate-900">{phone}</p>
                 </div>
                 <div className="rounded-3xl bg-orange-50 p-4">
                   <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Date of birth</p>
-                  <p className="mt-2 text-base font-medium text-slate-900">{user.dob}</p>
+                  <p className="mt-2 text-base font-medium text-slate-900">{formatFormDob(user.dob) || 'Not provided'}</p>
                 </div>
                 <div className="rounded-3xl bg-orange-50 p-4">
                   <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Orders</p>
-                  <p className="mt-2 text-base font-medium text-slate-900">{user.totalOrders}</p>
+                  <p className="mt-2 text-base font-medium text-slate-900">{totalOrders}</p>
                 </div>
                 <div className="rounded-3xl bg-orange-50 p-4">
                   <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Account</p>
-                  <p className="mt-2 text-base font-medium text-slate-900">Premium member</p>
+                  <p className="mt-2 text-base font-medium text-slate-900">{membership}</p>
                 </div>
               </div>
             </div>
@@ -129,28 +193,100 @@ const UserProfile = () => {
                   <h3 className="text-lg font-semibold text-slate-900">Profile summary</h3>
                   <p className="mt-1 text-sm text-slate-500">Your account is fully verified and benefits are active.</p>
                 </div>
-                <Link
-                  to="/profile"
+                <button
+                  type="button"
+                  onClick={() => setEditing(true)}
                   className="rounded-2xl border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-200"
                 >
-                  Edit
-                </Link>
+                  Edit Profile
+                </button>
               </div>
 
-              <div className="mt-6 space-y-4 text-slate-600">
-                <div>
-                  <p className="text-sm text-slate-500">Email</p>
-                  <p className="mt-1 font-medium text-slate-900">{user.email}</p>
+              {editing ? (
+                <div className="mt-6 space-y-4 text-slate-600">
+                  {saveError && (
+                    <div className="rounded-3xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                      {saveError}
+                    </div>
+                  )}
+                  <div className="grid gap-4">
+                    <label className="block">
+                      <span className="text-sm font-medium text-slate-700">Full Name</span>
+                      <input
+                        type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleFormChange}
+                        className="mt-2 w-full rounded-3xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+                      />
+                    </label>
+                    <label className="block">
+                      <span className="text-sm font-medium text-slate-700">Phone</span>
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleFormChange}
+                        className="mt-2 w-full rounded-3xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+                      />
+                    </label>
+                    <label className="block">
+                      <span className="text-sm font-medium text-slate-700">Date of Birth</span>
+                      <input
+                        type="date"
+                        name="dob"
+                        value={formData.dob}
+                        onChange={handleFormChange}
+                        className="mt-2 w-full rounded-3xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+                      />
+                    </label>
+                    <label className="block">
+                      <span className="text-sm font-medium text-slate-700">Address</span>
+                      <textarea
+                        name="address"
+                        value={formData.address}
+                        onChange={handleFormChange}
+                        rows={3}
+                        className="mt-2 w-full rounded-3xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+                      />
+                    </label>
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      onClick={handleSaveProfile}
+                      disabled={saving}
+                      className="rounded-3xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:bg-orange-300"
+                    >
+                      {saving ? 'Saving...' : 'Save Changes'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCancelEdit}
+                      disabled={saving}
+                      className="rounded-3xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-slate-500">Phone</p>
-                  <p className="mt-1 font-medium text-slate-900">{user.phone}</p>
+              ) : (
+                <div className="mt-6 space-y-4 text-slate-600">
+                  <div>
+                    <p className="text-sm text-slate-500">Email</p>
+                    <p className="mt-1 font-medium text-slate-900">{email}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-500">Phone</p>
+                    <p className="mt-1 font-medium text-slate-900">{phone}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-500">Membership</p>
+                    <p className="mt-1 font-medium text-slate-900">{membership}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-slate-500">Membership</p>
-                  <p className="mt-1 font-medium text-slate-900">{user.membership}</p>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
@@ -168,26 +304,32 @@ const UserProfile = () => {
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">
-              {user.addresses.map((address) => (
-                <div
-                  key={address.label}
-                  className={`rounded-3xl border p-5 shadow-sm ${address.primary ? 'border-orange-200 bg-orange-50' : 'border-slate-200 bg-white'}`}
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900">{address.label}</p>
-                      {address.primary && (
-                        <span className="mt-2 inline-flex rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold text-orange-700">
-                          Primary
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <p className="mt-4 text-sm text-slate-600">{address.line1}</p>
-                  {address.line2 && <p className="text-sm text-slate-600">{address.line2}</p>}
-                  <p className="mt-2 text-sm font-medium text-slate-900">{address.city}</p>
+              {addresses.length === 0 ? (
+                <div className="rounded-3xl border border-slate-200 bg-white p-5 text-slate-600">
+                  No saved address found. Update your profile to save an address.
                 </div>
-              ))}
+              ) : (
+                addresses.map((address) => (
+                  <div
+                    key={address.label}
+                    className={`rounded-3xl border p-5 shadow-sm ${address.primary ? 'border-orange-200 bg-orange-50' : 'border-slate-200 bg-white'}`}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900">{address.label}</p>
+                        {address.primary && (
+                          <span className="mt-2 inline-flex rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold text-orange-700">
+                            Primary
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <p className="mt-4 text-sm text-slate-600">{address.line1}</p>
+                    {address.line2 && <p className="text-sm text-slate-600">{address.line2}</p>}
+                    <p className="mt-2 text-sm font-medium text-slate-900">{address.city}</p>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
@@ -196,15 +338,21 @@ const UserProfile = () => {
             <p className="mt-1 text-sm text-slate-500">Enjoy premium perks available to your membership tier.</p>
 
             <div className="mt-6 grid gap-4">
-              {user.benefits.map((benefit) => (
-                <div
-                  key={benefit.title}
-                  className={`rounded-3xl p-5 ${benefit.color} ${benefit.text}`}
-                >
-                  <p className="text-sm font-semibold">{benefit.title}</p>
-                  <p className="mt-2 text-sm text-slate-700">{benefit.desc}</p>
+              {benefits.length > 0 ? (
+                benefits.map((benefit) => (
+                  <div
+                    key={benefit.title}
+                    className={`rounded-3xl p-5 ${benefit.color || 'bg-slate-100'} ${benefit.text || 'text-slate-900'}`}
+                  >
+                    <p className="text-sm font-semibold">{benefit.title}</p>
+                    <p className="mt-2 text-sm text-slate-700">{benefit.desc}</p>
+                  </div>
+                ))
+              ) : (
+                <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-600">
+                  No subscription benefits available for this account.
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>
