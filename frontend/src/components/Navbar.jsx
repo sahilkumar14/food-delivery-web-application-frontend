@@ -1,45 +1,125 @@
-import { ShoppingCart, User } from "lucide-react";
-import SearchBar from "./SearchBar";
-import FilterBar from "./FilterBar";
+import { useState } from "react";
+import { ShoppingCart, User, Menu, X } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
-const Navbar = () => {
+const Navbar = ({ isLoggedIn, onLogout, cartCount = 0 }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    onLogout();
+    navigate("/login",{replace:true});
+  };
+
+  const navLink = "hover:text-orange-600 transition duration-200";
+
   return (
-    <div className="shadow-md bg-white sticky top-0 z-50">
-
-      {/* Top Navbar */}
+    <nav className="shadow-md bg-white sticky top-0 z-50 border-b border-orange-100">
       <div className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
-        
-        {/* Left: Logo + Name */}
-        <div className="flex items-center gap-2">
+
+        {/* 🔶 Logo */}
+        <Link to="/" className="flex items-center gap-2">
           <div className="bg-orange-500 text-white px-3 py-2 rounded-lg font-bold">
             🍔
           </div>
-          <h1 className="text-xl font-bold">FoodExpress</h1>
+          <h1 className="text-xl font-bold text-gray-800">FoodExpress</h1>
+        </Link>
+
+        {/* 🔷 Desktop Menu */}
+        <div className="hidden md:flex items-center gap-6 font-medium text-gray-800">
+          {!isLoggedIn ? (
+            <>
+              <Link
+                to="/login"
+                className="border border-orange-500 text-orange-500 px-4 py-2 rounded-full hover:bg-orange-50 transition"
+              >
+                Login
+              </Link>
+
+              <Link
+                to="/signup"
+                className="bg-orange-500 text-white px-4 py-2 rounded-full hover:bg-orange-600 transition"
+              >
+                Signup
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link to="/home" className={navLink}>Home</Link>
+              <Link to="/orders" className={navLink}>Orders</Link>
+              <Link to="/history" className={navLink}>History</Link>
+
+              {/* 🛒 Cart with Badge */}
+              <Link
+                to="/cart"
+                className="relative flex items-center gap-1 hover:text-orange-600 transition"
+              >
+                <ShoppingCart size={20} />
+                Cart
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-3 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                    {cartCount}
+                  </span>
+                )}
+              </Link>
+
+              <Link to="/profile" className="flex items-center gap-1 hover:text-orange-600 transition">
+                <User size={20} />
+                Profile
+              </Link>
+
+              <button
+                onClick={handleLogout}
+                className="hover:text-orange-600 transition"
+              >
+                Logout
+              </button>
+            </>
+          )}
         </div>
 
-        {/* Right: Menu */}
-        <div className="hidden md:flex items-center gap-6 font-medium">
-          <a href="#" className="hover:text-blue-500">Home</a>
-          <a href="#" className="hover:text-blue-500">Orders</a>
-          
-          <div className="flex items-center gap-1 cursor-pointer hover:text-blue-500">
-            <ShoppingCart size={20} />
-            Cart
-          </div>
-
-          <div className="flex items-center gap-1 cursor-pointer hover:text-blue-500">
-            <User size={20} />
-            Profile
-          </div>
+        {/* 📱 Mobile Menu Button */}
+        <div className="md:hidden">
+          <button onClick={() => setIsOpen(!isOpen)}>
+            {isOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
       </div>
 
-      {/* Search Section */}
-      <SearchBar />
+      {/* 📱 Mobile Drawer */}
+      {isOpen && (
+        <div className="md:hidden bg-white border-t border-orange-100 px-6 py-4 space-y-4 font-medium text-gray-800">
+          {!isLoggedIn ? (
+            <>
+              <Link to="/login" onClick={() => setIsOpen(false)}>Login</Link>
+              <Link to="/signup" onClick={() => setIsOpen(false)}>Signup</Link>
+            </>
+          ) : (
+            <>
+              <Link to="/home" onClick={() => setIsOpen(false)}>Home</Link>
+              <Link to="/orders" onClick={() => setIsOpen(false)}>Orders</Link>
+              <Link to="/history" onClick={() => setIsOpen(false)}>History</Link>
 
-      {/* Filter Section */}
-      <FilterBar />
-    </div>
+              <Link to="/cart" onClick={() => setIsOpen(false)}>
+                Cart ({cartCount})
+              </Link>
+
+              <Link to="/profile" onClick={() => setIsOpen(false)}>Profile</Link>
+
+              <button
+                onClick={() => {
+                  handleLogout();
+                  setIsOpen(false);
+                }}
+                className="text-left w-full"
+              >
+                Logout
+              </button>
+            </>
+          )}
+        </div>
+      )}
+    </nav>
   );
 };
 

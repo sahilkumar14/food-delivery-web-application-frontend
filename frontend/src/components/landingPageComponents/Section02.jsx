@@ -20,16 +20,16 @@ const cards = [
 
 const Section02 = () => {
   return (
-    <section className='w-full min-h-[120vh] bg-gradient-to-b from-orange-50 via-white to-white flex items-center py-20'>
+    <section className='w-full min-h-[120vh] bg-white flex items-center py-20'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full'>
         <div className='text-center mb-10'>
-          <h2 className='text-4xl md:text-5xl font-extrabold text-gray-900'>Experience the Best</h2>
+          <h2 className='text-4xl md:text-5xl font-extrabold text-gray-800'>Experience the Best</h2>
           <p className='mt-4 text-gray-600 max-w-2xl mx-auto'>From browsing to delivery, this site is built to give you a fast, trustworthy, and delightful food ordering journey.</p>
         </div>
 
         <div className='flex md:grid md:grid-cols-3 gap-6 md:overflow-visible overflow-x-auto pb-2 scroll-smooth -mx-4 px-4 md:px-0 snap-x snap-mandatory'>
           {cards.map((card) => (
-            <article key={card.title} className='snap-center min-w-[280px] md:min-w-0 group relative rounded-3xl border border-orange-100 bg-white shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden transform hover:-translate-y-2 hover:scale-102 flex-shrink-0'>
+            <article key={card.title} className='snap-center min-w-[280px] md:min-w-0 group relative rounded-3xl border border-orange-100 bg-white shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden transform hover:-translate-y-2 hover:scale-102 flex-shrink-0 hover:border-orange-500'>
               <div className='h-52 overflow-hidden'>
                 <img
                   src={`${card.image}?auto=format&fit=crop&w=800&q=80`}
@@ -38,7 +38,7 @@ const Section02 = () => {
                 />
               </div>
               <div className='p-6'>
-                <h3 className='text-xl font-bold text-orange-500'>{card.title}</h3>
+                <h3 className='text-xl font-bold text-orange-600'>{card.title}</h3>
                 <p className='mt-3 text-gray-600 leading-relaxed'>{card.description}</p>
               </div>
             </article>
