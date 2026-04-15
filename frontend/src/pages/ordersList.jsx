@@ -8,6 +8,7 @@ import { authService } from "../services/api";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { RestaurantHomeContent } from "./restaurantHome";
+import { getCurrentCoordinates } from "../utils/location";
 
 const OrdersList = ({ onLogout }) => {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ const OrdersList = ({ onLogout }) => {
   const [orders, setOrders] = useState([]);
   const [restaurant, setRestaurant] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [actionLoadingId, setActionLoadingId] = useState(null);
   const [stats, setStats] = useState({
     todayRevenue: 0,
     todayOrders: 0,
@@ -48,6 +50,27 @@ const OrdersList = ({ onLogout }) => {
 
         if (profileResult.success) {
           setRestaurant(profileResult.data);
+
+          if (!profileResult.data?.locationCoordinates && navigator.geolocation) {
+            try {
+              const coords = await getCurrentCoordinates();
+              const locationResult = await authService.updateRestaurantLocation(user.id, {
+                location: profileResult.data.location,
+                locationCoordinates: coords,
+              });
+
+              if (locationResult.success) {
+                setRestaurant(locationResult.data);
+                authService.saveUser({
+                  ...user,
+                  location: locationResult.data.location,
+                  locationCoordinates: locationResult.data.locationCoordinates,
+                });
+              }
+            } catch {
+              // Ignore geolocation sync failures silently.
+            }
+          }
         }
 
         if (ordersResult.success) {
@@ -91,6 +114,46 @@ const OrdersList = ({ onLogout }) => {
     fetchOrders();
   }, []);
 
+  const handleOrderAction = async (order) => {
+    if (!restaurant?._id && !restaurant?.id) {
+      toast.error('Restaurant session not found');
+      return;
+    }
+
+    const action = order.status === 'pending' ? 'accept' : order.status === 'confirmed' ? 'ready' : null;
+
+    if (!action) {
+      return;
+    }
+
+    setActionLoadingId(order.id);
+
+    const result = await authService.updateRestaurantOrderStatus(
+      order.id,
+      restaurant._id || restaurant.id,
+      action
+    );
+
+    if (!result.success) {
+      toast.error(result.error || 'Failed to update order');
+      setActionLoadingId(null);
+      return;
+    }
+
+    setOrders((currentOrders) =>
+      currentOrders.map((currentOrder) =>
+        currentOrder._id === order.id ? result.data : currentOrder
+      )
+    );
+
+    toast.success(
+      action === 'accept'
+        ? 'Order accepted. Start preparing it now.'
+        : 'Order marked ready for pickup. Delivery agent can see it now.'
+    );
+    setActionLoadingId(null);
+  };
+
   // Transform orders to match the expected format
   const transformOrders = (orders) => {
     return orders.map(order => ({
@@ -99,7 +162,8 @@ const OrdersList = ({ onLogout }) => {
       customer: order.userId?.name || 'Unknown',
       phone: order.userId?.mob || 'N/A',
       address: order.address,
-      status: order.status.toLowerCase().replace(' ', '_'),
+      status: order.status.toLowerCase().replace(/\s+/g, '_'),
+      rawStatus: order.status,
       total: `$${order.totalPrice.toFixed(2)}`,
       items: order.items.map(item => ({
         name: `${item.quantity}x ${item.name}`,
@@ -113,7 +177,7 @@ const OrdersList = ({ onLogout }) => {
   };
 
   const activeOrders = transformOrders(orders.filter(order => 
-    ['Pending', 'Confirmed', 'Out for Delivery'].includes(order.status)
+    ['Pending', 'Confirmed', 'Ready for Pickup', 'Assigned to Agent', 'Picked from Restaurant', 'Out for Delivery'].includes(order.status)
   ));
 
   const recentDelivered = orders.find(order => order.status === 'Delivered');
@@ -187,7 +251,12 @@ const OrdersList = ({ onLogout }) => {
                       </div>
                     ) : activeOrders.length > 0 ? (
                       activeOrders.map((order) => (
-                        <OrderCard key={order.id} order={order} />
+                        <OrderCard
+                          key={order.id}
+                          order={order}
+                          onAction={handleOrderAction}
+                          isUpdating={actionLoadingId === order.id}
+                        />
                       ))
                     ) : (
                       <div className="text-center py-8">

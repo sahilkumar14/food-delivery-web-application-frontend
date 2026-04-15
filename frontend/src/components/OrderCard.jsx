@@ -11,6 +11,21 @@ const statusMap = {
     className: "bg-blue-100 text-blue-700",
     icon: <Package size={15} />,
   },
+  ready_for_pickup: {
+    label: "Ready for Pickup",
+    className: "bg-violet-100 text-violet-700",
+    icon: <Package size={15} />,
+  },
+  assigned_to_agent: {
+    label: "Assigned to Agent",
+    className: "bg-sky-100 text-sky-700",
+    icon: <Truck size={15} />,
+  },
+  picked_from_restaurant: {
+    label: "Picked from Restaurant",
+    className: "bg-orange-100 text-orange-700",
+    icon: <Truck size={15} />,
+  },
   out_for_delivery: {
     label: "Out for Delivery",
     className: "bg-orange-100 text-orange-700",
@@ -28,8 +43,8 @@ const statusMap = {
   },
 };
 
-const OrderCard = ({ order }) => {
-  const status = statusMap[order.status];
+const OrderCard = ({ order, onAction, isUpdating = false }) => {
+  const status = statusMap[order.status] || statusMap.pending;
 
   return (
     <div className="bg-card border border-border rounded-[24px] p-7 shadow-sm">
@@ -82,8 +97,12 @@ const OrderCard = ({ order }) => {
       </div>
 
       {order.action && (
-        <button className={`w-full py-4 rounded-2xl text-white font-semibold ${order.actionClass}`}>
-          {order.action}
+        <button
+          onClick={() => onAction && onAction(order)}
+          disabled={isUpdating}
+          className={`w-full py-4 rounded-2xl text-white font-semibold ${order.actionClass} ${isUpdating ? "opacity-60 cursor-not-allowed" : ""}`}
+        >
+          {isUpdating ? "Updating..." : order.action}
         </button>
       )}
     </div>

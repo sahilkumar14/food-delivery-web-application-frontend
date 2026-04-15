@@ -16,7 +16,8 @@ export const authService = {
             password: formData.password,
             mob: formData.mobile,
             dob: formData.dob,
-            address: formData.address
+            address: formData.address,
+            addressCoordinates: formData.addressCoordinates || null
           };
           break;
 
@@ -26,7 +27,8 @@ export const authService = {
             name: formData.fullName,
             email: formData.email,
             password: formData.password,
-            location: formData.location
+            location: formData.location,
+            locationCoordinates: formData.locationCoordinates || null
           };
           break;
 
@@ -63,7 +65,9 @@ export const authService = {
           email: formData.email,
           mob: formData.mobile || '',
           address: formData.address || '',
+          addressCoordinates: formData.addressCoordinates || data?.data?.addressCoordinates || null,
           location: formData.location || '',
+          locationCoordinates: formData.locationCoordinates || data?.data?.locationCoordinates || null,
           role,
         },
       };
@@ -102,7 +106,9 @@ export const authService = {
           email: data.data.email || email,
           mob: data.data.mob || data.data.phone || '',
           address: data.data.address || '',
+          addressCoordinates: data.data.addressCoordinates || null,
           location: data.data.location || '',
+          locationCoordinates: data.data.locationCoordinates || null,
           role
         },
       };
@@ -139,6 +145,30 @@ export const authService = {
     );
   },
 
+  getRestaurants: async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/restaurants`);
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message || 'Failed to fetch restaurants');
+      return { success: true, data: data.data || [] };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
+
+  getRestaurantById: async (restaurantId) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/restaurants/${restaurantId}`);
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message || 'Failed to fetch restaurant');
+      return { success: true, data: data.data };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
+
   // ===================== ORDERS =====================
 
   getRestaurantOrders: async (restaurantId) => {
@@ -154,9 +184,41 @@ export const authService = {
     }
   },
 
+  updateRestaurantOrderStatus: async (orderId, restaurantId, action) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/restaurant/orders/${orderId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ restaurantId, action }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message);
+      return { success: true, data: data.data };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
+
   getRestaurantProfile: async (restaurantId) => {
     try {
       const res = await fetch(`${API_BASE_URL}/restaurants/${restaurantId}`);
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message);
+      return { success: true, data: data.data };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
+
+  updateRestaurantLocation: async (restaurantId, locationPayload) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/restaurants/${restaurantId}/location`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(locationPayload),
+      });
       const data = await res.json();
 
       if (!res.ok) throw new Error(data.message);
@@ -235,6 +297,23 @@ export const authService = {
 
       return { success: true, data: data.data };
 
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
+
+  updateAgentOrderStatus: async (orderId, agentId, status) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/agent/orders/${orderId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ agentId, status }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      return { success: true, data: data.data };
     } catch (error) {
       return { success: false, error: error.message };
     }

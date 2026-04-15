@@ -3,6 +3,8 @@ import { useCart } from '../contexts/CartContext';
 import Button from '../components/Button';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { authService } from '../services/api';
+import { getCurrentCoordinates } from '../utils/location';
 
 const CheckoutPage = () => {
   const { items, getTotal, clearCart } = useCart();
@@ -17,12 +19,33 @@ const CheckoutPage = () => {
   });
 
   const [isProcessing, setIsProcessing] = useState(false);
+  const [deliveryCoordinates, setDeliveryCoordinates] = useState(null);
+  const [locationLoading, setLocationLoading] = useState(false);
 
   useEffect(() => {
     if (items.length === 0) {
       navigate('/cart');
     }
-  }, [items]);
+  }, [items, navigate]);
+
+  useEffect(() => {
+    const user = authService.getCurrentUser();
+
+    if (!user) return;
+
+    setFormData((prev) => ({
+      ...prev,
+      name: user.name || prev.name,
+      email: user.email || prev.email,
+      phone: user.mob || user.phone || prev.phone,
+      address: user.address || prev.address,
+    }));
+
+    if (user.addressCoordinates) {
+      setDeliveryCoordinates(user.addressCoordinates);
+    }
+  }, []);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -36,9 +59,10 @@ const CheckoutPage = () => {
     setIsProcessing(true);
 
     try {
-      const user = JSON.parse(localStorage.getItem("user"));
+      const user = authService.getCurrentUser();
+      const userId = user?.id || user?._id;
 
-      if (!user?._id) {
+      if (!userId) {
         throw new Error("User not logged in");
       }
 
@@ -46,8 +70,15 @@ const CheckoutPage = () => {
         throw new Error("Restaurant info missing");
       }
 
+      let resolvedCoordinates = deliveryCoordinates;
+
+      if (!resolvedCoordinates) {
+        resolvedCoordinates = await getCurrentCoordinates();
+        setDeliveryCoordinates(resolvedCoordinates);
+      }
+
       const orderPayload = {
-        userId: user._id,
+        userId,
         restaurantId: items[0].restaurantId,
         items: items.map(item => ({
           name: item.name,
@@ -55,23 +86,16 @@ const CheckoutPage = () => {
           price: item.price
         })),
         totalPrice: getTotal(),
-        address: formData.address
+        address: formData.address,
+        deliveryCoordinates: resolvedCoordinates
       };
 
       console.log("Sending order:", orderPayload);
 
-      const res = await fetch("http://localhost:5000/order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(orderPayload)
-      });
+      const result = await authService.placeOrder(orderPayload);
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || "Order failed");
+      if (!result.success) {
+        throw new Error(result.error || "Order failed");
       }
 
       clearCart();
@@ -83,6 +107,20 @@ const CheckoutPage = () => {
       toast.error(error.message);
     } finally {
       setIsProcessing(false);
+    }
+  };
+
+  const handleCaptureDeliveryLocation = async () => {
+    setLocationLoading(true);
+
+    try {
+      const coordinates = await getCurrentCoordinates();
+      setDeliveryCoordinates(coordinates);
+      toast.success('Delivery location captured successfully');
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setLocationLoading(false);
     }
   };
 
@@ -164,6 +202,28 @@ const CheckoutPage = () => {
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
+              </div>
+
+              <div className="rounded-xl border border-orange-200 bg-orange-50 p-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-gray-800">Delivery Coordinates</p>
+                    <p className="text-xs text-gray-600">Needed for rider map and route handoff.</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCaptureDeliveryLocation}
+                    disabled={isProcessing || locationLoading}
+                    className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+                  >
+                    {locationLoading ? 'Capturing...' : 'Use Current Location'}
+                  </button>
+                </div>
+                <p className="mt-3 text-sm text-gray-700">
+                  {deliveryCoordinates
+                    ? `Lat ${deliveryCoordinates.lat}, Lng ${deliveryCoordinates.lng}`
+                    : 'Current delivery coordinates not captured yet.'}
+                </p>
               </div>
 
               <div>

@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { authService } from '../services/api'
 import toast from 'react-hot-toast'
+import { getCurrentCoordinates } from '../utils/location'
 
 const roleLabels = {
   customer: 'Customer',
@@ -20,6 +21,7 @@ const Signup = ({ onAuth }) => {
     dob: '',
     address: '',
     location: '',
+    locationCoordinates: null,
     gstNumber: '',
     vehicleNo: '',
     termsAccepted: false,
@@ -27,6 +29,7 @@ const Signup = ({ onAuth }) => {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [locationLoading, setLocationLoading] = useState(false)
 
   const nameLabel = role === 'restaurant' ? 'Restaurant Name' : 'Full Name'
   const namePlaceholder = role === 'restaurant' ? 'Enter restaurant name' : 'Your full name'
@@ -68,6 +71,12 @@ const Signup = ({ onAuth }) => {
       return
     }
 
+    if (role === 'restaurant' && !formData.locationCoordinates) {
+      setError('Please capture restaurant current location before signup.')
+      setLoading(false)
+      return
+    }
+
     const result = await authService.signup(formData, role)
 
     if (result.success) {
@@ -88,6 +97,24 @@ const Signup = ({ onAuth }) => {
     }
 
     setLoading(false)
+  }
+
+  const handleUseCurrentLocation = async () => {
+    setLocationLoading(true)
+    setError('')
+
+    try {
+      const coordinates = await getCurrentCoordinates()
+      setFormData((prev) => ({
+        ...prev,
+        locationCoordinates: coordinates,
+      }))
+      toast.success('Restaurant location captured successfully')
+    } catch (error) {
+      setError(error.message)
+    } finally {
+      setLocationLoading(false)
+    }
   }
 
   return (
@@ -287,19 +314,45 @@ const Signup = ({ onAuth }) => {
             )}
 
             {role === 'restaurant' && (
-              <label className="block">
-                <span className="text-sm font-semibold text-slate-700">Location</span>
-                <input
-                  type="text"
-                  name="location"
-                  value={formData.location}
-                  onChange={handleChange}
-                  required
-                  disabled={loading}
-                  className="mt-2 w-full rounded-3xl border border-orange-200  px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100 disabled:bg-slate-100"
-                  placeholder="Restaurant location"
-                />
-              </label>
+              <div className="space-y-3">
+                <label className="block">
+                  <span className="text-sm font-semibold text-slate-700">Location</span>
+                  <input
+                    type="text"
+                    name="location"
+                    value={formData.location}
+                    onChange={handleChange}
+                    required
+                    disabled={loading}
+                    className="mt-2 w-full rounded-3xl border border-orange-200  px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100 disabled:bg-slate-100"
+                    placeholder="Restaurant location"
+                  />
+                </label>
+
+                <div className="rounded-3xl border border-orange-200 bg-orange-50 px-4 py-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-700">Restaurant Coordinates</p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        Capture current location so delivery route works correctly.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleUseCurrentLocation}
+                      disabled={loading || locationLoading}
+                      className="rounded-3xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+                    >
+                      {locationLoading ? 'Capturing...' : 'Use Current Location'}
+                    </button>
+                  </div>
+                  <p className="mt-3 text-sm text-slate-600">
+                    {formData.locationCoordinates
+                      ? `Lat ${formData.locationCoordinates.lat}, Lng ${formData.locationCoordinates.lng}`
+                      : 'Current coordinates not captured yet.'}
+                  </p>
+                </div>
+              </div>
             )}
 
             {role === 'restaurant' && (
