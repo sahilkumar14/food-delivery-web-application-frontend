@@ -5,7 +5,7 @@
 <p align="center"> <img src="https://img.shields.io/badge/Frontend-React-blue?style=for-the-badge&logo=react" /> <img src="https://img.shields.io/badge/Backend-Node.js-green?style=for-the-badge&logo=node.js" /> <img src="https://img.shields.io/badge/Database-MongoDB-darkgreen?style=for-the-badge&logo=mongodb" /> <img src="https://img.shields.io/badge/Styling-TailwindCSS-38B2AC?style=for-the-badge&logo=tailwind-css" /> </p>
 🌐 Live Demo
 
-🔗 Add your deployed link here
+🔗 deployed link: https://food-delivery-web-application-front-henna.vercel.app/
 
 📸 Preview
 <p align="center"> <img src="https://via.placeholder.com/800x400?text=Homepage+Preview" width="80%" /> </p>
