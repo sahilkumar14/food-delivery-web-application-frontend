@@ -6,6 +6,7 @@
 🌐 Live Demo
 
 🔗 deployed link: https://food-delivery-web-application-front-henna.vercel.app/
+🔗 backend repository link: https://github.com/sahilkumar14/food-delivery-web-application-backend
 
 📸 Preview
 <p align="center"> <img src="https://via.placeholder.com/800x400?text=Homepage+Preview" width="80%" /><img width="1917" height="907" alt="image" src="https://github.com/user-attachments/assets/a53296bb-a9e1-4c0b-a087-f0cd62a28e75" />
