@@ -8,7 +8,8 @@
 🔗 deployed link: https://food-delivery-web-application-front-henna.vercel.app/
 
 📸 Preview
-<p align="center"> <img src="https://via.placeholder.com/800x400?text=Homepage+Preview" width="80%" /> </p>
+<p align="center"> <img src="https://via.placeholder.com/800x400?text=Homepage+Preview" width="80%" /><img width="1917" height="907" alt="image" src="https://github.com/user-attachments/assets/a53296bb-a9e1-4c0b-a087-f0cd62a28e75" />
+ </p>
 📌 Overview
 
 A production-ready Food Delivery Web Application that connects customers, restaurants, and delivery agents in a seamless ecosystem.
